@@ -62,3 +62,7 @@
     snapCardinals: true
     layers:
     - state: icon
+  - type: ShipMiningDrillComponent
+    damage:
+      types:
+        Structural: 15

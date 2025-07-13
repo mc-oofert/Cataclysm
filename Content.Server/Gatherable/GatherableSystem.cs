@@ -66,7 +66,7 @@ public sealed partial class GatherableSystem : EntitySystem
         // This ensures that components like OreVein have their event handlers called
         var eventArgs = new DestructionEventArgs();
         RaiseLocalEvent(gatheredUid, eventArgs);
-        
+
         // Now queue the entity for deletion
         QueueDel(gatheredUid);
 
