@@ -49,11 +49,15 @@ public sealed class ShipMiningDrillSystem : EntitySystem
 
     private void OnStartCollide(EntityUid uid, ShipMiningDrillComponent component, ref StartCollideEvent args)
     {
+        if (args.OurFixtureId != ShipMiningDrillComponent.DrillFixture)
+            return;
         component.Targets.Add(args.OtherEntity);
     }
 
     private void OnEndCollide(EntityUid uid, ShipMiningDrillComponent component, ref EndCollideEvent args)
     {
+        if (args.OurFixtureId != ShipMiningDrillComponent.DrillFixture)
+            return;
         component.Targets.Remove(args.OtherEntity);
     }
     private void OnOreVeinCollected(EntityUid uid, ShipMiningDrillComponent component, ref OreVeinCollectedEvent args)

@@ -5,8 +5,9 @@ namespace Content.Server.StorageSys.Components;
 [RegisterComponent]
 public sealed partial class ShipMiningDrillComponent : Component
 {
+    public const string DrillFixture = "drill";
     [DataField]
-    public float DrillCooldown = 1f;
+    public float DrillCooldown = 0.7f;
     [DataField(required: true)]
     public DamageSpecifier Damage = default!;
 

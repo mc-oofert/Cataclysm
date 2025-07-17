@@ -24,6 +24,16 @@
         - MachineMask
         layer:
         - MachineLayer
+      drill:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-0.4, 0.4, 0.4, 0.5"
+        density: 0
+        hard: false
+        mask:
+        - MachineMask
+        layer:
+        - MachineLayer
   - type: Destructible
     thresholds:
     - trigger:
@@ -65,4 +75,5 @@
   - type: ShipMiningDrill
     damage:
       types:
-        Structural: 15
+        Piercing: 10
+        Structural: 20
