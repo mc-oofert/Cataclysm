@@ -10,6 +10,6 @@ public sealed partial class ShipMiningDrillComponent : Component
     [DataField(required: true)]
     public DamageSpecifier Damage = default!;
 
-    public TimeSpan NextDrill;
+    public TimeSpan NextDrill = TimeSpan.Zero;
     public HashSet<EntityUid> Targets = new();
 }
