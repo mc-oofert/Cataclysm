@@ -38,7 +38,7 @@ public sealed class ShipMiningDrillSystem : EntitySystem
                 if (vein != null)
                     vein.Collector = uid;
 
-                _damageable.TryChangeDamage(drilledEntity, drill.Damage, true);
+                _damageable.TryChangeDamage(drilledEntity, drill.Damage);
 
                 if (vein != null)
                     vein.Collector = null;
