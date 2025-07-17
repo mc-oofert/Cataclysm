@@ -34,10 +34,14 @@ public sealed class ShipMiningDrillSystem : EntitySystem
                 continue;
             foreach (EntityUid drilledEntity in drill.Targets)
             {
-                OreVeinComponent vein = EntityManager.GetComponent<OreVeinComponent>(drilledEntity);
+                TryComp(drilledEntity, out OreVeinComponent? vein);
                 if (vein != null)
                     vein.Collector = uid;
+
                 _damageable.TryChangeDamage(drilledEntity, drill.Damage, true);
+
+                if (vein != null)
+                    vein.Collector = null;
             }
             drill.NextDrill = _gameTiming.CurTime + TimeSpan.FromSeconds(drill.DrillCooldown);
         }
