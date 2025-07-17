@@ -1,9 +1,11 @@
 using System.Diagnostics.CodeAnalysis;
 using Content.Server.NodeContainer;
 using Content.Server.Power.EntitySystems;
+using Content.Server.Stack;
 using Content.Server.StorageSys.Events;
 using Content.Server.StorageSys.NodeGroups;
 using Robust.Server.Containers;
+using Robust.Shared.Prototypes;
 
 namespace Content.Server.StorageSys.EntitySystems;
 
@@ -12,6 +14,9 @@ public sealed partial class StorageNetSystem : EntitySystem
     [Dependency] private readonly PowerReceiverSystem _powerReceiverSystem = default!;
     [Dependency] private readonly ContainerSystem _containerSystem = default!;
     [Dependency] private readonly SharedAppearanceSystem _sharedAppearanceSystem = default!;
+    [Dependency] private readonly StackSystem _stackSystem = default!;
+    [Dependency] private readonly IPrototypeManager _prototypeManager = default!;
+    [Dependency] private readonly IComponentFactory _componentFactory = default!;
 
     public override void Initialize()
     {
@@ -19,6 +24,7 @@ public sealed partial class StorageNetSystem : EntitySystem
 
         InitializeControllers();
         InitializeMaterials();
+        InitializeItems();
     }
 
     /// <summary>

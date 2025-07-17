@@ -11,13 +11,8 @@ public sealed class StorageControllerData
         MarketData = new();
     }
 
-    public StorageControllerData(StorageMarketData marketData)
+    public StorageControllerData(StorageControllerData copyFrom)
     {
-        MarketData = marketData;
-    }
-
-    public StorageControllerData Copy()
-    {
-        return new(MarketData.Copy());
+        MarketData = new(copyFrom.MarketData);
     }
 }

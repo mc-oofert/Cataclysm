@@ -13,6 +13,7 @@ public sealed partial class StorageNet : BaseNodeGroup
 
     public readonly List<EntityUid> Controllers = [];
     public readonly List<EntityUid> MaterialContainers = [];
+    public readonly List<EntityUid> ItemContainers = [];
 
     public StorageControllerData? ControllerData;
 

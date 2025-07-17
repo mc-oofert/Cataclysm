@@ -10,7 +10,7 @@ namespace Content.Server.StorageSys.EntitySystems;
 
 public sealed partial class StorageNetSystem : EntitySystem
 {
-    public void InitializeControllers()
+    private void InitializeControllers()
     {
         SubscribeLocalEvent<StorageControllerComponent, ComponentStartup>(OnStorageControllerStartup);
 
@@ -23,24 +23,24 @@ public sealed partial class StorageNetSystem : EntitySystem
         SubscribeLocalEvent<StorageControllerComponent, PowerChangedEvent>(OnStorageControllerPowerChanged);
     }
 
-    public void OnStorageControllerStartup(EntityUid uid, StorageControllerComponent comp, ComponentStartup args)
+    private void OnStorageControllerStartup(EntityUid uid, StorageControllerComponent comp, ComponentStartup args)
     {
         SpawnInContainerOrDrop(comp.DriveSlotPrototype, uid, StorageControllerComponent.DriveSlotName);
     }
 
-    public void OnStorageControllerLoadNode(EntityUid uid, StorageControllerComponent comp, StorageNetLoadNodeEvent args)
+    private void OnStorageControllerLoadNode(EntityUid uid, StorageControllerComponent comp, StorageNetLoadNodeEvent args)
     {
         args.Net.Controllers.Add(uid);
         TryConnectControllerDrive(uid);
     }
 
-    public void OnStorageControllerRemoveNode(EntityUid uid, StorageControllerComponent comp, StorageNetRemoveNodeEvent args)
+    private void OnStorageControllerRemoveNode(EntityUid uid, StorageControllerComponent comp, StorageNetRemoveNodeEvent args)
     {
         args.Net.Controllers.Remove(uid);
         TryDisconnectControllerDrive(uid);
     }
 
-    public void OnStorageControllerContainerInsert(EntityUid uid, StorageControllerComponent comp, ContainerModifiedMessage args)
+    private void OnStorageControllerContainerInsert(EntityUid uid, StorageControllerComponent comp, ContainerModifiedMessage args)
     {
         if (args.Container.ID != StorageControllerComponent.DriveSlotName)
             return;
@@ -52,7 +52,7 @@ public sealed partial class StorageNetSystem : EntitySystem
         TryConnectControllerDrive(uid);
     }
 
-    public void OnStorageControllerContainerRemove(EntityUid uid, StorageControllerComponent comp, ContainerModifiedMessage args)
+    private void OnStorageControllerContainerRemove(EntityUid uid, StorageControllerComponent comp, ContainerModifiedMessage args)
     {
         if (args.Container.ID != StorageControllerComponent.DriveSlotName)
             return;
@@ -69,7 +69,7 @@ public sealed partial class StorageNetSystem : EntitySystem
         TryDisconnectControllerDrive(net, drive);
     }
 
-    public void OnStorageControllerPowerChanged(EntityUid uid, StorageControllerComponent comp, PowerChangedEvent args)
+    private void OnStorageControllerPowerChanged(EntityUid uid, StorageControllerComponent comp, PowerChangedEvent args)
     {
         if (args.Powered)
             TryConnectControllerDrive(uid);
@@ -122,7 +122,9 @@ public sealed partial class StorageNetSystem : EntitySystem
         if (drive.ConnectedNet != net)
             return;
 
-        drive.Data = net.ControllerData?.Copy();
+        if (net.ControllerData != null)
+            drive.Data = new(net.ControllerData);
+
         drive.ConnectedNet = null;
 
         foreach (var uid in net.Controllers)

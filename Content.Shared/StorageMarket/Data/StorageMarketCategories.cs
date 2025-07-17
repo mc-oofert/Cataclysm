@@ -1,4 +1,4 @@
-namespace Content.Server.StorageMarket.Data;
+namespace Content.Shared.StorageMarket.Data;
 
 [Flags]
 public enum StorageMarketCategories : uint

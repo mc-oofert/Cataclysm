@@ -2,24 +2,25 @@ using Content.Server.StorageSys.Components;
 using Content.Server.StorageSys.Events;
 using Content.Server.StorageSys.NodeGroups;
 using Content.Shared.Materials;
+using Content.Shared.Stacks;
 using Robust.Shared.Prototypes;
 
 namespace Content.Server.StorageSys.EntitySystems;
 
 public sealed partial class StorageNetSystem : EntitySystem
 {
-    public void InitializeMaterials()
+    private void InitializeMaterials()
     {
-        SubscribeLocalEvent<MaterialStorageContainerComponent, StorageNetLoadNodeEvent>(OnMaterialContainerLoadNode);
-        SubscribeLocalEvent<MaterialStorageContainerComponent, StorageNetRemoveNodeEvent>(OnMaterialContainerRemoveNode);
+        SubscribeLocalEvent<MaterialStorageContainerComponent, StorageNetLoadNodeEvent>(OnMaterialStorageContainerLoadNode);
+        SubscribeLocalEvent<MaterialStorageContainerComponent, StorageNetRemoveNodeEvent>(OnMaterialStorageContainerRemoveNode);
     }
 
-    public void OnMaterialContainerLoadNode(EntityUid uid, MaterialStorageContainerComponent comp, StorageNetLoadNodeEvent args)
+    private void OnMaterialStorageContainerLoadNode(EntityUid uid, MaterialStorageContainerComponent comp, StorageNetLoadNodeEvent args)
     {
         args.Net.MaterialContainers.Add(uid);
     }
 
-    public void OnMaterialContainerRemoveNode(EntityUid uid, MaterialStorageContainerComponent comp, StorageNetRemoveNodeEvent args)
+    private void OnMaterialStorageContainerRemoveNode(EntityUid uid, MaterialStorageContainerComponent comp, StorageNetRemoveNodeEvent args)
     {
         args.Net.MaterialContainers.Remove(uid);
     }
@@ -111,8 +112,92 @@ public sealed partial class StorageNetSystem : EntitySystem
         var existingAmount = container.Storage.GetValueOrDefault(material);
         var finalAmount = Math.Clamp(existingAmount + amount, 0, container.Capacity);
 
-        container.Storage[material] = finalAmount;
+        if (finalAmount == 0)
+            container.Storage.Remove(material);
+        else
+            container.Storage[material] = finalAmount;
 
         return finalAmount - existingAmount;
+    }
+
+    public bool CanChangeMaterial(ProtoId<MaterialPrototype> material, int amount, StorageNet net)
+    {
+        return GetMaxMaterialChange(material, amount, net) == amount;
+    }
+
+    public bool CanChangeMaterial(ProtoId<MaterialPrototype> material, int amount, EntityUid containerUid, MaterialStorageContainerComponent? container = null)
+    {
+        return GetMaxMaterialChange(material, amount, containerUid, container) == amount;
+    }
+
+    /// <summary>
+    /// Tries to insert a material entity (singular or stack) into the storage net.
+    /// </summary>
+    public void TryInsertMaterialEntity(Entity<PhysicalCompositionComponent?> entity, StorageNet net)
+    {
+        if (!Resolve(entity, ref entity.Comp))
+            return;
+
+        if (TryComp<StackComponent>(entity, out var stack))
+            TryInsertMaterialEntityStack((entity, entity.Comp, stack), net);
+        else
+            TryInsertMaterialEntitySingle(entity, net);
+    }
+
+    /// <summary>
+    /// Tries to insert a singular material entity (e.g. a gun) into the storage net.
+    /// </summary>
+    /// <returns>Whether the entity was successfully inserted.</returns>
+    public bool TryInsertMaterialEntitySingle(Entity<PhysicalCompositionComponent?> entity, StorageNet net)
+    {
+        if (!Resolve(entity, ref entity.Comp))
+            return false;
+
+        foreach (var materialPair in entity.Comp.MaterialComposition)
+            if (!CanChangeMaterial(materialPair.Key, materialPair.Value, net))
+                return false;
+
+        foreach (var materialPair in entity.Comp.MaterialComposition)
+            TryChangeMaterial(materialPair.Key, materialPair.Value, net);
+
+        Del(entity);
+        return true;
+    }
+
+    /// <summary>
+    /// Tries to insert a stack of material entities (e.g. a stack of steel sheets) into the storage net.
+    /// </summary>
+    /// <returns>The number of items in the stack that were successfully inserted.</returns>
+    public int TryInsertMaterialEntityStack(Entity<PhysicalCompositionComponent?, StackComponent?> entity, StorageNet net)
+    {
+        if (!Resolve(entity, ref entity.Comp1, ref entity.Comp2))
+            return 0;
+        if (entity.Comp2.Count <= 0)
+            return 0;
+
+        // The highest number of entities in the stack we can insert.
+        var maxInsertions = entity.Comp2.Count;
+
+        foreach (var materialPair in entity.Comp1.MaterialComposition)
+        {
+            if (materialPair.Value <= 0)
+                throw new InvalidOperationException($"Material '{materialPair.Key}' has an invalid unit value of '{materialPair.Value}'");
+
+            var stackAmount = materialPair.Value * maxInsertions;
+            var maxChange = GetMaxMaterialChange(materialPair.Key, stackAmount, net);
+
+            maxInsertions = maxChange / materialPair.Value;
+
+            if (maxInsertions <= 0)
+                return 0;
+        }
+
+        if (!_stackSystem.Use(entity, maxInsertions, entity.Comp2))
+            return 0;
+
+        foreach (var materialPair in entity.Comp1.MaterialComposition)
+            TryChangeMaterial(materialPair.Key, materialPair.Value * maxInsertions, net);
+
+        return maxInsertions;
     }
 }

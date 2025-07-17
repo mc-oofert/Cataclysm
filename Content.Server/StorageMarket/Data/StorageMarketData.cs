@@ -1,21 +1,24 @@
+using Content.Shared.StorageMarket.Prototypes;
+using Robust.Shared.Prototypes;
+
 namespace Content.Server.StorageMarket.Data;
 
 public sealed class StorageMarketData
 {
-    public List<StorageMarketEntry> Entries;
+    public List<ProtoId<StorageEntryPrototype>> Entries;
+
+    /// <summary>
+    /// The ideal value of goods in stock to reach, per entry.
+    /// </summary>
+    public int IdealStockValue;
 
     public StorageMarketData()
     {
-        Entries = [];
+        Entries = new();
     }
 
-    public StorageMarketData(List<StorageMarketEntry> entries)
+    public StorageMarketData(StorageMarketData copyFrom)
     {
-        Entries = entries;
-    }
-
-    public StorageMarketData Copy()
-    {
-        return new([.. Entries]);
+        Entries = new(copyFrom.Entries);
     }
 }
