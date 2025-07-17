@@ -48,14 +48,15 @@ public sealed class ShipMiningDrillSystem : EntitySystem
         component.Targets.Add(args.OtherEntity);
     }
 
-    private void OnEndCollide(Entity<ShipMiningDrillComponent> entity, ref EndCollideEvent args)
+    private void OnEndCollide(EntityUid uid, ShipMiningDrillComponent component, ref EndCollideEvent args)
     {
-        entity.Comp.Targets.Remove(args.OtherEntity);
+        component.Targets.Remove(args.OtherEntity);
     }
-    private void OnOreVeinCollected(Entity<ShipMiningDrillComponent> entity, ref OreVeinCollectedEvent args)
+    private void OnOreVeinCollected(EntityUid uid, ShipMiningDrillComponent component, ref OreVeinCollectedEvent args)
     {
-        if (!_storageNetSystem.TryGetStorageNet(entity, out var storageNet))
+        if (!_storageNetSystem.TryGetStorageNet(uid, out var storageNet))
             return;
-        _storageNetSystem.TryInsertItem(entity, storageNet);
+        foreach (EntityUid id in args.Loot)
+            _storageNetSystem.TryInsertMaterialEntity(id, storageNet);
     }
 }
