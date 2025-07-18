@@ -99,16 +99,6 @@ namespace Content.Server.Destructible
             }
         }
 
-        public void BreakEntity(EntityUid uid)
-        {
-            RaiseLocalEvent(uid, new BreakageEventArgs(), true);
-        }
-
-        public void DestroyEntity(EntityUid uid)
-        {
-            EntityManager.QueueDeleteEntity(uid);
-        }
-
         // FFS this shouldn't be this hard. Maybe this should just be a field of the destructible component. Its not
         // like there is currently any entity that is NOT just destroyed upon reaching a total-damage value.
         /// <summary>

@@ -47,7 +47,7 @@ public sealed class MiningSystem : EntitySystem
             spawnedLoot.Add(Spawn(proto.OreEntity, coords.Offset(_random.NextVector2(0.2f))));
         }
         if (component.Collector != null)
-            RaiseLocalEvent(uid, new OreVeinCollectedEvent(uid, (EntityUid)component.Collector, spawnedLoot));
+            RaiseLocalEvent((EntityUid)component.Collector, new OreVeinCollectedEvent(uid, (EntityUid)component.Collector, spawnedLoot));
     }
 
     private void OnMapInit(EntityUid uid, OreVeinComponent component, MapInitEvent args)
