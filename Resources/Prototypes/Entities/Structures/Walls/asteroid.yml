@@ -33,7 +33,7 @@
       state: rock_asteroid_west
   - type: MiningScannerViewable
   - type: Damageable
-    damageContainer: Rock
+    damageContainer: StructuralInorganic
     damageModifierSet: Rock
   - type: Destructible
     thresholds:
