@@ -5,6 +5,8 @@ using Content.Shared.Mining;
 using Content.Shared.Damage;
 using Robust.Shared.Timing;
 using Content.Shared.Mining.Components;
+using Robust.Shared.Audio;
+using Robust.Shared.Audio.Systems;
 
 namespace Content.Server.StorageSys.EntitySystems;
 
@@ -14,6 +16,7 @@ public sealed class ShipMiningDrillSystem : EntitySystem
     [Dependency] private readonly IGameTiming _gameTiming = default!;
     [Dependency] private readonly PowerReceiverSystem _powerReceiverSystem = default!;
     [Dependency] private readonly StorageNetSystem _storageNetSystem = default!;
+    [Dependency] private readonly SharedAudioSystem _audio = default!;
 
     public override void Initialize()
     {
@@ -38,7 +41,10 @@ public sealed class ShipMiningDrillSystem : EntitySystem
                 if (vein != null)
                     vein.Collector = uid;
 
-                _damageable.TryChangeDamage(drilledEntity, drill.Damage);
+                if (_damageable.TryChangeDamage(drilledEntity, drill.Damage) != null && drill.DrillSound != null)
+                {
+                    _audio.PlayPvs(drill.DrillSound, uid, AudioParams.Default.WithVariation(0.125f).AddVolume(-0.5f));
+                }
 
                 if (vein != null)
                     vein.Collector = null;

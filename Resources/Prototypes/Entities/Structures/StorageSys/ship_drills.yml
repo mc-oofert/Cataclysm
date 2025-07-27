@@ -73,7 +73,11 @@
     layers:
     - state: icon
   - type: ShipMiningDrill
+    drillSound: /Audio/Items/drill_use.ogg
+    passiveSound: /Audio/Items/drill_use.ogg
     damage:
       types:
         Piercing: 8
         Structural: 20
+  - type: ApcPowerReceiver
+    powerLoad: 5000
